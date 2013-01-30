@@ -14,19 +14,13 @@ from subprocess import Popen, PIPE
 from nltk.internals import find_binary, find_file
 from nltk.tag.api import TaggerI
 
-def tUoB(obj, encoding='utf-8'):
-    if isinstance(obj, str):
-        if not isinstance(obj, str):
-            obj = str(obj, encoding)
-    return obj
-
 _treetagger_url = 'http://www.ims.uni-stuttgart.de/projekte/corplex/TreeTagger'
 
 _treetagger_languages = {
 'latin-1':['bulgarian', 'dutch', 'english', 'estonian', 'french', 'german', 'greek', 'italian', 'latin', 'russian', 'spanish', 'swahili'],
 'utf8' : ['french', 'german', 'greek', 'italian', 'spanish']}
 
-"""The default encoding used by TreeTagger: utf8. u'' means latin-1; ISO-8859-1"""
+"""The default encoding used by TreeTagger: utf8. '' means latin-1; ISO-8859-1"""
 _treetagger_charset = ['utf8', 'latin-1']
 
 class TreeTagger(TaggerI):
@@ -46,37 +40,37 @@ class TreeTagger(TaggerI):
         >>> from treetagger import TreeTagger
         >>> tt = TreeTagger(encoding='latin-1',language='english')
         >>> tt.tag('What is the airspeed of an unladen swallow ?')
-        [[u'What', u'WP', u'What'],
-         [u'is', u'VBZ', u'be'],
-         [u'the', u'DT', u'the'],
-         [u'airspeed', u'NN', u'airspeed'],
-         [u'of', u'IN', u'of'],
-         [u'an', u'DT', u'an'],
-         [u'unladen', u'JJ', u'<unknown>'],
-         [u'swallow', u'NN', u'swallow'],
-         [u'?', u'SENT', u'?']]
+        [['What', 'WP', 'What'],
+         ['is', 'VBZ', 'be'],
+         ['the', 'DT', 'the'],
+         ['airspeed', 'NN', 'airspeed'],
+         ['of', 'IN', 'of'],
+         ['an', 'DT', 'an'],
+         ['unladen', 'JJ', '<unknown>'],
+         ['swallow', 'NN', 'swallow'],
+         ['?', 'SENT', '?']]
 
     .. doctest::
         :options: +SKIP
 
         >>> from treetagger import TreeTagger
         >>> tt = TreeTagger()
-        >>> tt.tag(u'Das Haus ist sehr schön und groß. Es hat auch einen hübschen Garten.')
-        [[u'Das', u'ART', u'd'],
-         [u'Haus', u'NN', u'Haus'],
-         [u'ist', u'VAFIN', u'sein'],
-         [u'sehr', u'ADV', u'sehr'],
-         [u'sch\xf6n', u'ADJD', u'sch\xf6n'],
-         [u'und', u'KON', u'und'],
-         [u'gro\xdf', u'ADJD', u'gro\xdf'],
-         [u'.', u'$.', u'.'],
-         [u'Es', u'PPER', u'es'],
-         [u'hat', u'VAFIN', u'haben'],
-         [u'auch', u'ADV', u'auch'],
-         [u'einen', u'ART', u'ein'],
-         [u'h\xfcbschen', u'ADJA', u'h\xfcbsch'],
-         [u'Garten', u'NN', u'Garten'],
-         [u'.', u'$.', u'.']]
+        >>> tt.tag('Das Haus ist sehr schön und groß. Es hat auch einen hübschen Garten.')
+        [['Das', 'ART', 'die'],
+         ['Haus', 'NN', 'Haus'],
+         ['ist', 'VAFIN', 'sein'],
+         ['sehr', 'ADV', 'sehr'],
+         ['schön', 'ADJD', 'schön'],
+         ['und', 'KON', 'und'],
+         ['groß', 'ADJD', 'groß'],
+         ['.', '$.', '.'],
+         ['Es', 'PPER', 'es'],
+         ['hat', 'VAFIN', 'haben'],
+         ['auch', 'ADV', 'auch'],
+         ['einen', 'ART', 'eine'],
+         ['hübschen', 'ADJA', 'hübsch'],
+         ['Garten', 'NN', 'Garten'],
+         ['.', '$.', '.']]
     """
 
     def __init__(self, path_to_home=None, language='german', 
@@ -144,17 +138,18 @@ class TreeTagger(TaggerI):
                     shell=False, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         
         (stdout, stderr) = p.communicate(_input)
-        treetagger_output = stdout
+        assert type(stdout) == bytes
+        treetagger_output = stdout.decode(encoding)
 
         # Check the return code.
         if p.returncode != 0:
             print(stderr)
             raise OSError('TreeTagger command failed!')
 
-        if isinstance(stdout, str) and encoding:
-            treetagger_output = stdout.decode(encoding)
-        else:
-            treetagger_output = tUoB(stdout)
+        ## if isinstance(stdout, str) and encoding:
+        ##     treetagger_output = stdout.decode(encoding)
+        ## else:
+        ##     treetagger_output = tUoB(stdout)
 
         # Output the tagged sentences
         tagged_sentences = []
