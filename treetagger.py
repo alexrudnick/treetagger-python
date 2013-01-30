@@ -15,22 +15,22 @@ from nltk.internals import find_binary, find_file
 from nltk.tag.api import TaggerI
 
 def tUoB(obj, encoding='utf-8'):
-    if isinstance(obj, basestring):
-        if not isinstance(obj, unicode):
-            obj = unicode(obj, encoding)
+    if isinstance(obj, str):
+        if not isinstance(obj, str):
+            obj = str(obj, encoding)
     return obj
 
 _treetagger_url = 'http://www.ims.uni-stuttgart.de/projekte/corplex/TreeTagger'
 
 _treetagger_languages = {
-u'latin-1':['bulgarian', 'dutch', 'english', 'estonian', 'french', 'german', 'greek', 'italian', 'latin', 'russian', 'spanish', 'swahili'],
-u'utf8' : ['french', 'german', 'greek', 'italian', 'spanish']}
+'latin-1':['bulgarian', 'dutch', 'english', 'estonian', 'french', 'german', 'greek', 'italian', 'latin', 'russian', 'spanish', 'swahili'],
+'utf8' : ['french', 'german', 'greek', 'italian', 'spanish']}
 
 """The default encoding used by TreeTagger: utf8. u'' means latin-1; ISO-8859-1"""
-_treetagger_charset = [u'utf8', u'latin-1']
+_treetagger_charset = ['utf8', 'latin-1']
 
 class TreeTagger(TaggerI):
-    ur"""
+    r"""
     A class for pos tagging with TreeTagger. The input is the paths to:
      - a language trained on training data
      - (optionally) the path to the TreeTagger binary
@@ -97,16 +97,16 @@ class TreeTagger(TaggerI):
         treetagger_paths = ['.', '/usr/bin', '/usr/local/bin', '/opt/local/bin',
                         '/Applications/bin', '~/bin', '~/Applications/bin',
                         '~/work/TreeTagger/cmd']
-        treetagger_paths = map(os.path.expanduser, treetagger_paths)
+        treetagger_paths = list(map(os.path.expanduser, treetagger_paths))
 
         try:
             if language in _treetagger_languages[encoding]:
-                if encoding == u'latin-1':
+                if encoding == 'latin-1':
                     """the executable has no encoding information for latin-1"""
                     treetagger_bin_name = 'tree-tagger-' + language
-                    self._encoding = u'latin-1'
+                    self._encoding = 'latin-1'
                 else:
-                    treetagger_bin_name = 'tree-tagger-' + language + u'-' + encoding
+                    treetagger_bin_name = 'tree-tagger-' + language + '-' + encoding
                     self._encoding = encoding
 
             else:
@@ -136,7 +136,7 @@ class TreeTagger(TaggerI):
         else:
             _input = sentences
 
-        if isinstance(_input, unicode) and encoding:
+        if isinstance(_input, str) and encoding:
             _input = _input.encode(encoding)
 
         # Run the tagger and get the output
@@ -148,18 +148,18 @@ class TreeTagger(TaggerI):
 
         # Check the return code.
         if p.returncode != 0:
-            print stderr
+            print(stderr)
             raise OSError('TreeTagger command failed!')
 
-        if isinstance(stdout, unicode) and encoding:
+        if isinstance(stdout, str) and encoding:
             treetagger_output = stdout.decode(encoding)
         else:
             treetagger_output = tUoB(stdout)
 
         # Output the tagged sentences
         tagged_sentences = []
-        for tagged_word in treetagger_output.strip().split(u'\n'):
-            tagged_word_split = tagged_word.split(u'\t')
+        for tagged_word in treetagger_output.strip().split('\n'):
+            tagged_word_split = tagged_word.split('\t')
             tagged_sentences.append(tagged_word_split)
 
         return tagged_sentences
